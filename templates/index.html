@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Phillips Wiz Light Control</title>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+	<style type="text/css">
+		.glow {
+			box-shadow: 0 0 5px yellow;
+			background-color: yellow;
+		}
+		#kelvin-slider::-webkit-slider-runnable-track {
+  			background: linear-gradient(to right, rgb(255, 0, 0), rgb(255, 255, 0), rgb(255, 255, 255), rgb(166, 200, 255), rgb(0, 0, 255));
+		}
+
+		#red-slider::-webkit-slider-runnable-track {
+			background: linear-gradient(to right, rgb(0, 0, 0), rgb(255, 0, 0));
+		}
+
+		#green-slider::-webkit-slider-runnable-track {
+			background: linear-gradient(to right, rgb(0, 0, 0), rgb(0, 255, 0));
+		}
+
+		#blue-slider::-webkit-slider-runnable-track {
+			background: linear-gradient(to right, rgb(0, 0, 0), rgb(0, 0, 255));
+		}
+		.slider {
+			width: 50%;
+		}
+
+		#rgb-output {
+			margin-top: 10px;
+			width: 100px;
+			height: 100px;
+			border: 1px solid #000;
+		}
+	</style>
+
+</head>
+<body>
+	<h1>Light Control</h1>
+	
+	<button id="onButton">On</button>
+	<button id="offButton">Off</button>
+	<button id="explodeButton">Demo</button>
+
+	<div id="dimmer-switch">
+          Brightness: <input type="range" min="10" max="100" value="50" id="dimmer-range">
+    </div>
+	      Color Temperature: <input type="range" min="2700" max="6500" value="2700" class="slider" id="kelvin-slider";">
+    <br><br>
+
+	<label for="red-slider">Red</label>
+	<input type="range" min="0" max="255" value="127" class="slider" id="red-slider">
+	<br>
+	<label for="green-slider">Green</label>
+	<input type="range" min="0" max="255" value="127" class="slider" id="green-slider">
+	<br>
+	<label for="blue-slider">Blue</label>
+	<input type="range" min="0" max="255" value="127" class="slider" id="blue-slider">
+	<div id="rgb-output"></div>
+	
+	<h1>Scenes</h1>
+	<div id="buttons">
+	  <!-- Create 32 buttons with scene names in functional groups. -->
+	  <div>White</div> 
+	  <button onclick="buttonClick(11)">Warm White</button>
+	  <button onclick="buttonClick(12)">Daylight</button>
+	  <button onclick="buttonClick(13)">Cool White</button> 
+	  <div>Functional</div>
+	  <button onclick="buttonClick(14)">Night Light</button>
+	  <button onclick="buttonClick(15)">Focus</button>
+	  <button onclick="buttonClick(16)">Relax</button>
+	  <button onclick="buttonClick(17)">True Color</button>
+	  <button onclick="buttonClick(18)">TV Time</button>
+	  <button onclick="buttonClick(19)">Plant Growth</button>	
+	  <div>Dynamic White</div>
+	  <button onclick="buttonClick(29)">Candlelight</button>
+	  <button onclick="buttonClick(30)">Golden White</button>
+	  <button onclick="buttonClick(31)">Pulse</button>	  
+	  <button onclick="buttonClick(32)">Steampunk</button>
+	  <div>Dynamic Color</div>
+	  <button onclick="buttonClick(5)">Fireplace</button>
+	  <button onclick="buttonClick(22)">Fall</button>
+	  <button onclick="buttonClick(26)">Club</button>
+	  <button onclick="buttonClick(3)">Sunset</button><br>
+	  <button onclick="buttonClick(2)">Romance</button>
+	  <button onclick="buttonClick(4)">Party</button>
+	  <button onclick="buttonClick(8)">Pastel Colors</button>
+	  <button onclick="buttonClick(20)">Spring</button><br>
+	  <button onclick="buttonClick(21)">Summer</button>
+	  <button onclick="buttonClick(7)">Forest</button>
+	  <button onclick="buttonClick(24)">Jungle</button>
+	  <button onclick="buttonClick(25)">Mojito</button><br>
+	  <button onclick="buttonClick(1)">Ocean</button>
+	  <button onclick="buttonClick(23)">Deep Dive</button>
+	  <button onclick="buttonClick(27)">Christmas</button>
+	  <button onclick="buttonClick(33)">Diwali</button><br>
+	  <button onclick="buttonClick(28)">Halloween</button>
+	  <div>Progressive</div>
+	  <button onclick="buttonClick(9)">Wake Up</button>
+	  <button onclick="buttonClick(10)">Bedtime</button>
+    </div>
+
+	<script type="text/javascript">
+		// Path prefix for flaskapp routes, change for WSGI or GUNICORN routes
+		
+		// wsgi
+		//var root_path = '/flaskapp/';	  
+		// gunicorn
+		var root_path = '/';
+
+		$(document).ready(function() {
+
+
+			// RGB Sliders
+			var redValue = 255;
+			var greenValue = 255;
+			var blueValue = 255;
+			var redSlider = $("#red-slider");
+			var greenSlider = $("#green-slider");
+			var blueSlider = $("#blue-slider");
+			var rgbOutput = $("#rgb-output");
+
+			redSlider.on("input", function() {
+				redValue = redSlider.val();
+				rgbOutput.css("background-color", "rgb(" + redValue + "," + greenValue + "," + blueValue + ")");
+				sendColorValues();
+			});
+
+			greenSlider.on("input", function() {
+				greenValue = greenSlider.val();
+				rgbOutput.css("background-color", "rgb(" + redValue + "," + greenValue + "," + blueValue + ")");
+				sendColorValues();
+			});
+
+			blueSlider.on("input", function() {
+				blueValue = blueSlider.val();
+				rgbOutput.css("background-color", "rgb(" + redValue + "," + greenValue + "," + blueValue + ")");
+				sendColorValues();
+			});
+
+			function sendColorValues() {
+				var colorString = redValue + ":" + greenValue + ":" + blueValue;
+				$.ajax({
+				url: root_path + "color/" + colorString,
+					type: "GET",
+					success: function(data) {
+						console.log("Request successful with response: ", data);
+					},
+					error: function() {
+						console.log("Error making request");
+					}
+				});
+			
+			};
+
+			// Dimmer Switch 
+			var dimmerRange = $("#dimmer-range");
+			var dimmerValue = dimmerRange.val();
+
+			// Update the dimmer value when the range is changed
+			dimmerRange.on("input", function() {
+			dimmerValue = dimmerRange.val();
+
+				// Send the dimmer value to the backend
+				$.ajax({
+					url: root_path + "dim/" + dimmerValue,
+					type: "POST",
+					success: function() {
+						console.log("Dimmer value updated");
+					}
+				});
+		    });
+
+			// Gets the CSRF token for AJAX requests
+			function getCsrfToken() {
+				return $('meta[name=csrf-token]').attr('content');
+			}
+
+			// AJAX call function
+			function ajaxCall(url, button) {
+				// Add the 'glow' class to the button for 1 second
+				button.addClass('glow');
+				setTimeout(function() {
+					button.removeClass('glow');
+				}, 1000);
+
+				// Make the AJAX call
+				$.ajax({
+		            url: url,
+		            type: "POST",
+		            data: {
+		            	csrf_token: getCsrfToken(),
+		            },
+		            dataType: "json",
+		            success: function(data) {
+		            	$("#result").html(data.result);
+		            },
+		            error: function(xhr, textStatus, errorThrown) {
+		                console.log(xhr, textStatus, errorThrown);
+		            }
+		        });
+			}
+
+			// Button click event handlers
+			$("#onButton").click(function() {
+				var button = $(this);
+				ajaxCall(root_path + "on", button);
+			});
+
+			$("#offButton").click(function() {
+				var button = $(this);
+				ajaxCall(root_path + "off", button);
+			});
+
+			$("#explodeButton").click(function() {
+				var button = $(this);
+				ajaxCall(root_path + "explode", button);
+			});
+
+			$("#kelvin-slider").on("input", function() {
+	
+			var kelvinValue = $(this).val();
+			var rgbValue = kelvinToRGB(kelvinValue);
+			$("#slider-color").css("background-color", rgbValue);
+				$.ajax({
+				url: root_path + "kelvin/" + kelvinValue,
+				type: "GET",
+				success: function(data) {
+					console.log("Request successful with response: ", data);
+				},
+				error: function() {
+					console.log("Error making request");
+				}
+				});
+			}); 
+		});
+
+		function buttonClick(buttonNumber) {
+				// Make an AJAX call to the Flask app.
+				$.ajax({
+					url: root_path + "scene/" + buttonNumber,
+					type: "GET",
+					success: function(data) {
+					// Do something with the response data.
+					console.log(data);
+					},
+					error: function(error) {
+					// Handle errors.
+					console.log(error);
+					}
+				});
+		}
+		function kelvinToRGB(kelvin){
+				var r, g, b;
+				if (kelvin < 1000){
+				kelvin = 1000;
+				} else if (kelvin > 40000){
+				kelvin = 40000;
+				}
+				var temp = kelvin / 100;
+				if (temp <= 66){
+				r = 255;
+				g = temp;
+				g = 99.4708025861 * Math.log(g) - 161.1195681661;
+				if (temp <= 19){
+					b = 0;
+				} else {
+					b = temp - 10;
+					b = 138.5177312231 * Math.log(b) - 305.0447927307;
+				}
+				} else {
+				r = temp - 60;
+				r = 329.698727446 * Math.pow(r, -0.1332047592);
+				g = temp - 60;
+				g = 288.1221695283 * Math.pow(g, -0.0755148492);
+				b = 255;
+				}
+				return "rgb(" + Math.round(r) + ", " + Math.round(g) + ", " + Math.round(b) + ")";
+			}
+	</script>
+</body>
+</html>
