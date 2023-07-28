@@ -16,13 +16,12 @@ gunicorn flaskapp:app --name flaskapp -b 0.0.0.0:8000
 
 If you want to run this app as a wsgi app, you can change the root_path in the index.html file to match the path on your server. For gunicorn the root_path = "/" should be set as follows.
 
-This simple app supports the following:
+var root_path = '/';
 
-* On / Off
-* Brightness
-* Color Temperature
-* Custom R:G:B settings
-* 32 Scenes
+You will all need to update the IP addresses of your lightbulbs at the top of flaskapp.py
+
+# IP Addresses of Light Bulbs - Change this to change the IP address of your light bulbs or add/delete them
+light_bulb_ips = [ '192.168.1.77', '192.168.1.192']
 
 References for this project:
 https://aleksandr.rogozin.us/blog/2021/8/13/hacking-philips-wiz-lights-via-command-line
