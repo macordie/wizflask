@@ -1,6 +1,6 @@
 # This is a simple Flask App to Control Phillips WIZ lights 
 # on your network without using an Internet connection.  
-#
+
 
 from flask import Flask, render_template, request
 import socket, time
